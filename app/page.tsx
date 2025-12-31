@@ -29,8 +29,13 @@ import d4logo from "@/app/assets/images/d4logo.png";
 // --- CUSTOM SLOW SMOOTH SCROLL LOGIC ---
 const useSlowScroll = () => {
   useEffect(() => {
-    let currentScroll = 0;
-    let targetScroll = 0;
+    // Only apply custom smooth scroll on desktop/pointer devices
+    // to avoid breaking native touch scrolling on mobile
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    if (isMobile) return;
+
+    let currentScroll = window.scrollY;
+    let targetScroll = window.scrollY;
     const speed = 0.05;
 
     const handleWheel = (e: WheelEvent) => {
@@ -39,11 +44,10 @@ const useSlowScroll = () => {
     };
 
     const update = () => {
-      targetScroll = Math.max(
-        0,
-        Math.min(targetScroll, document.body.scrollHeight - window.innerHeight)
-      );
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
       currentScroll += (targetScroll - currentScroll) * speed;
+      
       window.scrollTo(0, currentScroll);
       requestAnimationFrame(update);
     };
@@ -182,7 +186,7 @@ export default function LinkPool() {
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
 
   return (
-    <div className="min-h-screen bg-[#07060a] text-white relative selection:bg-[#ec5745]/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#07060a] text-white relative selection:bg-[#ec5745]/30 overflow-x-hidden touch-pan-y">
       <SparkEffect />
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-[#ec5745] origin-left z-[100]"
