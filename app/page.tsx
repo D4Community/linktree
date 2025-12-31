@@ -26,46 +26,15 @@ import {
 
 import d4logo from "@/app/assets/images/d4logo.png";
 
-// --- CUSTOM SLOW SMOOTH SCROLL LOGIC ---
+// --- CUSTOM SMOOTH SCROLL LOGIC ---
 const useSlowScroll = () => {
   useEffect(() => {
-    // Detect if the device has a mouse/trackpad and is not a touch-primary device
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isMobile = window.innerWidth <= 1024; // Standard tablet/mobile breakpoint
+    // We apply smooth scrolling via CSS for native feel
+    // and handle hardware acceleration to prevent stuttering
+    document.documentElement.style.scrollBehavior = "smooth";
     
-    // Completely skip this logic for mobile/touch
-    if (isTouchDevice || isMobile) return;
-
-    let currentScroll = window.scrollY;
-    let targetScroll = window.scrollY;
-    let rafId: number;
-    const speed = 0.05;
-
-    const handleWheel = (e: WheelEvent) => {
-      // Only prevent default if we are actually handling the scroll via JS
-      e.preventDefault();
-      targetScroll += e.deltaY;
-    };
-
-    const update = () => {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
-      currentScroll += (targetScroll - currentScroll) * speed;
-      
-      if (Math.abs(targetScroll - currentScroll) > 0.1) {
-        window.scrollTo(0, currentScroll);
-      }
-      
-      rafId = requestAnimationFrame(update);
-    };
-
-    // Use { passive: false } only on desktop to allow e.preventDefault()
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    rafId = requestAnimationFrame(update);
-
     return () => {
-      window.removeEventListener("wheel", handleWheel);
-      cancelAnimationFrame(rafId);
+      document.documentElement.style.scrollBehavior = "auto";
     };
   }, []);
 };
@@ -194,7 +163,7 @@ export default function LinkPool() {
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
 
   return (
-    <div className="min-h-screen bg-[#07060a] text-white relative selection:bg-[#ec5745]/30 overflow-x-hidden overflow-y-auto touch-pan-y">
+    <div className="min-h-screen bg-[#07060a] text-white relative selection:bg-[#ec5745]/30 overflow-x-hidden">
       <SparkEffect />
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-[#ec5745] origin-left z-[100]"
@@ -406,8 +375,7 @@ function LinkButtons() {
             ease: [0.16, 1, 0.3, 1],
           }}
           whileHover={{
-            scale: 1.02,
-            x: 10,
+            scale: 1.01,
             backgroundColor: "rgba(255, 255, 255, 0.07)",
             borderColor: item.brand,
             boxShadow: `0 0 20px ${item.brand}20`
