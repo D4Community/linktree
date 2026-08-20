@@ -23,7 +23,6 @@ import {
   Monitor,
   Smartphone,
 } from "lucide-react";
-
 import d4logo from "@/app/assets/images/d4logo.png";
 
 // --- CUSTOM SMOOTH SCROLL LOGIC ---
@@ -353,7 +352,7 @@ function LinkButtons() {
     {
       label: "Apply to be a Volunteer",
       icon: <UserPlus size={20} />,
-      link: "https://forms.gle/CY8eDostKx2t8Wx49",
+      link: "https://recruitment.d4community.com/",
       brand: "#ec5745",
     },
   ];
