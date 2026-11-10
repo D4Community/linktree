@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  MotionConfig,
+  useScroll,
+  useSpring,
+} from "framer-motion";
 import {
   MessageCircle,
   Linkedin,
@@ -14,17 +20,15 @@ import {
   Users,
   UserPlus,
   Send,
-  Code,
-  Terminal,
-  Cpu,
-  Database,
-  Zap,
-  Rocket,
-  Monitor,
-  Smartphone,
+  ArrowUpRight,
 } from "lucide-react";
 
-import d4logo from "@/app/assets/images/d4logo.png";
+import logoDark from "@/app/assets/images/d4logo-dark.webp";
+import logoLight from "@/app/assets/images/d4logo-light.webp";
+import ThemeToggle from "@/app/components/ThemeToggle";
+
+// Accent used by the official D4 site's connect experience.
+const CORAL = "#fd7d6e";
 
 // --- CUSTOM SMOOTH SCROLL LOGIC ---
 const useSlowScroll = () => {
@@ -32,7 +36,7 @@ const useSlowScroll = () => {
     // We apply smooth scrolling via CSS for native feel
     // and handle hardware acceleration to prevent stuttering
     document.documentElement.style.scrollBehavior = "smooth";
-    
+
     return () => {
       document.documentElement.style.scrollBehavior = "auto";
     };
@@ -74,7 +78,10 @@ const SparkEffect = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[9999]">
+    <div
+      aria-hidden
+      className="fixed inset-0 pointer-events-none z-[9999]"
+    >
       <AnimatePresence>
         {clicks.map((spark) => (
           <motion.div
@@ -87,11 +94,12 @@ const SparkEffect = () => {
               y: Math.sin(spark.angle * (Math.PI / 180)) * 45,
             }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="absolute h-[3px] bg-[#ec5745] rounded-full origin-left shadow-[#ec5745]"
+            className="absolute h-[3px] rounded-full origin-left"
             style={{
               left: spark.x,
               top: spark.y,
               rotate: `${spark.angle}deg`,
+              backgroundColor: CORAL,
             }}
           />
         ))}
@@ -100,62 +108,6 @@ const SparkEffect = () => {
   );
 };
 
-// --- FLOATING ELEMENT TYPES ---
-interface FloatingElementProps {
-  children: React.ReactNode;
-  delay: number;
-  x: string;
-  y: string;
-  size?: number;
-}
-
-// --- BACKGROUND DECORATION ---
-const FloatingElement: React.FC<FloatingElementProps> = ({ children, delay, x, y, size = 1 }) => (
-  <motion.div
-    animate={{ y: [0, -30, 0], rotate: [0, 10, -10, 0] }}
-    transition={{ duration: 10, repeat: Infinity, delay, ease: "easeInOut" }}
-    className="absolute pointer-events-none opacity-[0.07] text-white"
-    style={{ left: x, top: y, scale: size }}
-  >
-    {children}
-  </motion.div>
-);
-
-interface DoodleShapesProps {
-  x: string;
-  y: string;
-  color: string;
-}
-
-const DoodleShapes: React.FC<DoodleShapesProps> = ({ x, y, color }) => (
-  <div className="absolute opacity-10 blur-[1px]" style={{ left: x, top: y }}>
-    <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-      <path d="M10 50 Q 25 25 50 50 T 90 50" stroke={color} strokeWidth="2" strokeLinecap="round"/>
-      <circle cx="70" cy="40" r="3" fill={color}/>
-    </svg>
-  </div>
-);
-
-const DoodleShape: React.FC<DoodleShapesProps> = ({ x, y, color }) => (
-  <motion.div
-    animate={{ scale: [1, 1.1, 1] }}
-    transition={{ duration: 8, repeat: Infinity }}
-    className="absolute opacity-[0.08] blur-[0.5px]"
-    style={{ left: x, top: y }}
-  >
-    <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
-      <path
-        d="M20 80 Q 40 20 80 80"
-        stroke={color}
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-      <circle cx="40" cy="40" r="4" fill={color} />
-      <circle cx="65" cy="35" r="4" fill={color} />
-    </svg>
-  </motion.div>
-);
-
 export default function LinkPool() {
   useSlowScroll();
 
@@ -163,71 +115,60 @@ export default function LinkPool() {
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
 
   return (
-    <div className="min-h-screen bg-[#07060a] text-white relative selection:bg-[#ec5745]/30 overflow-x-hidden">
-      <SparkEffect />
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-[#ec5745] origin-left z-[100]"
-        style={{ scaleX }}
-      />
+    <MotionConfig reducedMotion="user">
+      <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground selection:bg-[#fd7d6e]/30">
+        <SparkEffect />
+        <motion.div
+          aria-hidden
+          className="fixed top-0 left-0 right-0 h-0.5 origin-left z-[100]"
+          style={{ scaleX, backgroundColor: CORAL }}
+        />
 
-      {/* BACKGROUND ELEMENTS */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[70%] h-[70%] bg-[#ec5745]/05 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-900/10 blur-[120px] rounded-full" />
-        
-        <FloatingElement x="5%" y="15%" delay={0}>
-          <Code size={35} />
-        </FloatingElement>
-        <FloatingElement x="85%" y="10%" delay={1}>
-          <Terminal size={28} />
-        </FloatingElement>
-        <FloatingElement x="12%" y="70%" delay={2}>
-          <Cpu size={32} />
-        </FloatingElement>
-        <FloatingElement x="88%" y="80%" delay={3}>
-          <Zap size={30} />
-        </FloatingElement>
-        <FloatingElement x="50%" y="90%" delay={1.5}>
-          <Database size={30} />
-        </FloatingElement>
-        <DoodleShape x="25%" y="20%" color="#ec5745" />
-        <DoodleShape x="75%" y="45%" color="#f43f5e" />
-        <DoodleShapes x="40%" y="80%" color="#a855f7" />
-        <DoodleShapes x="90%" y="25%" color="#f97316" />
-        <DoodleShapes x="12%" y="35%" color="#3b82f6" />
-      </div>
+        {/* THEME TOGGLE (same light/dark behaviour as the main D4 site) */}
+        <div className="fixed right-4 top-4 z-50">
+          <ThemeToggle />
+        </div>
 
-      {/* CONTENT */}
-      <div className="relative z-10 flex flex-col items-center px-4">
-        <div className="w-full max-w-xl py-16">
-          <Header />
-          <LinkButtons />
+        {/* BACKGROUND: static take on the main site's hero grid */}
+        <div
+          aria-hidden
+          className="d4-grid pointer-events-none fixed inset-0 z-0"
+        />
 
-          <footer className="mt-20 text-center pb-12 opacity-50">
-            <p className="text-[10px] tracking-[0.3em] uppercase font-bold flex flex-wrap justify-center gap-2">
-              <span>Built by</span>
-              <a
-                href="https://github.com/d4community"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-slate-300 hover:text-[#ec5745] transition-colors"
-              >
-                D4 Web Team
-              </a>
-              <span className="text-[#ec5745]">&</span>
-              <a
-                href="https://github.com/ayush24k"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-slate-300 hover:text-[#ec5745] transition-colors"
-              >
-                ayush24k
-              </a>
-            </p>
-          </footer>
+        {/* CONTENT */}
+        <div className="relative z-10 flex flex-col items-center px-4">
+          <div className="w-full max-w-xl pt-20 pb-12 md:pt-24">
+            <main>
+              <Header />
+              <LinkButtons />
+            </main>
+
+            <footer className="mt-16 pb-8 text-center">
+              <p className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+                <span>Built by</span>
+                <a
+                  href="https://github.com/d4community"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-foreground transition-colors hover:text-[#fd7d6e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+                >
+                  D4 Web Team
+                </a>
+                <span className="text-[#fd7d6e]">&</span>
+                <a
+                  href="https://github.com/ayush24k"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-foreground transition-colors hover:text-[#fd7d6e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+                >
+                  ayush24k
+                </a>
+              </p>
+            </footer>
+          </div>
         </div>
       </div>
-    </div>
+    </MotionConfig>
   );
 }
 
@@ -236,53 +177,60 @@ function Header() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false }}
-      transition={{ duration: 1, ease: "easeOut" }}
-      className="text-center mb-16 flex flex-col items-center"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="mb-12 flex flex-col items-center text-center"
     >
-      <div className="relative mb-8 group">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -inset-5 border border-dashed border-[#ec5745]/30 rounded-full"
+      <a
+        href="https://d4community.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mb-6 inline-block rounded-md transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+      >
+        {/* Official D4 logos: light-on-dark and dark-on-light variants */}
+        <Image
+          src={logoDark}
+          alt="D4 Community logo"
+          priority
+          className="hidden w-32 h-auto md:w-36 dark:block"
         />
+        <Image
+          src={logoLight}
+          alt="D4 Community logo"
+          priority
+          className="w-32 h-auto md:w-36 dark:hidden"
+        />
+      </a>
 
-        <a
-          href="https://d4community.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="relative z-10 inline-block"
-        >
-          <Image
-            src={d4logo}
-            alt="d4logo"
-            className="w-28 transition-transform group-hover:scale-110 cursor-pointer"
-          />
-        </a>
-      </div>
-
-      <h1 className="text-4xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#ec5745] via-[#f43f5e] to-purple-500 mb-6">
+      <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
         D4 Community
       </h1>
 
-      <div className="flex flex-wrap justify-center gap-2 mb-8">
+      <div className="mb-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
         {fullForm.map((word, i) => (
           <React.Fragment key={word}>
-            <span className="text-slate-200 font-bold tracking-widest text-xs md:text-sm uppercase">
+            <span className="text-xs font-semibold uppercase tracking-widest md:text-sm">
               {word}
             </span>
-            {i < 3 && <span className="text-slate-700">•</span>}
+            {i < 3 && (
+              <span aria-hidden className="text-muted-foreground">
+                •
+              </span>
+            )}
           </React.Fragment>
         ))}
       </div>
-      <p className="text-slate-400 font-medium tracking-wide text-sm md:text-base">
+
+      <p className="mb-6 text-sm text-muted-foreground md:text-base">
         An Open-Source Tech Community
       </p>
 
-      <div className="h-[2px] w-32 bg-gradient-to-r from-transparent via-[#ec5745] to-transparent mb-8" />
-      <p className="text-slate-300 font-semibold text-lg tracking-wide italic">"For the Developers • By the Developers"</p>
+      <div className="mb-6 h-px w-32 bg-gradient-to-r from-transparent via-neutral-400 to-transparent dark:via-neutral-600" />
+
+      <p className="text-base font-medium italic md:text-lg">
+        "For the Developers • By the Developers"
+      </p>
     </motion.div>
   );
 }
@@ -292,6 +240,8 @@ interface LinkItem {
   icon: React.ReactNode;
   link: string;
   brand: string;
+  /** Presentation only: renders the card as the primary (inverted) action. */
+  featured?: boolean;
 }
 
 function LinkButtons() {
@@ -355,47 +305,61 @@ function LinkButtons() {
       icon: <UserPlus size={20} />,
       link: "https://forms.gle/CY8eDostKx2t8Wx49",
       brand: "#ec5745",
+      featured: true,
     },
   ];
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      {links.map((item, idx) => (
-        <motion.a
-          key={idx}
-          href={item.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.1 }}
-          transition={{
-            duration: 0.9,
-            delay: idx * 0.04,
-            ease: [0.16, 1, 0.3, 1],
-          }}
-          whileHover={{
-            scale: 1.01,
-            backgroundColor: "rgba(255, 255, 255, 0.07)",
-            borderColor: item.brand,
-            boxShadow: `0 0 20px ${item.brand}20`
-          }}
-          className="flex items-center p-5 bg-white/[0.03] border border-white/10 rounded-2xl transition-all group backdrop-blur-sm"
-        >
-          <div
-            style={{ color: item.brand }}
-            className="mr-5 group-hover:rotate-[360deg] transition-transform duration-700"
+    <div className="flex w-full flex-col gap-3">
+      {links.map((item, idx) => {
+        // A pure-white brand colour (GitHub) would vanish on the light theme,
+        // so it follows the theme's foreground instead.
+        const tint =
+          item.brand.toLowerCase() === "#fff" ? "var(--foreground)" : item.brand;
+
+        return (
+          <motion.a
+            key={idx}
+            href={item.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{
+              duration: 0.5,
+              delay: idx * 0.04,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            style={{ "--brand": tint } as React.CSSProperties}
+            className={
+              item.featured
+                ? "group flex items-center gap-4 rounded-xl border border-neutral-950 bg-neutral-950 px-4 py-3.5 text-white transition-colors hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:border-white dark:bg-white dark:text-black dark:hover:bg-neutral-200"
+                : "group flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3.5 text-card-foreground shadow-sm transition-all duration-200 hover:border-[color:var(--brand)] hover:bg-accent hover:shadow-[0_0_0_4px_color-mix(in_oklab,var(--brand)_12%,transparent)] focus-visible:border-[color:var(--brand)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            }
           >
-            {item.icon}
-          </div>
-          <span className="font-bold text-slate-200 group-hover:text-white transition-colors">
-            {item.label}
-          </span>
-          <div className="ml-auto opacity-0 group-hover:opacity-100 transition-all">
-            <Send size={14} className="text-slate-500" />
-          </div>
-        </motion.a>
-      ))}
+            <span
+              className={
+                item.featured
+                  ? "flex size-10 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white/10 transition-transform duration-200 group-hover:scale-105 dark:border-black/10 dark:bg-black/5"
+                  : "brand-chip flex size-10 shrink-0 items-center justify-center rounded-lg border transition-transform duration-200 group-hover:scale-105"
+              }
+            >
+              {item.icon}
+            </span>
+            <span className="font-medium">{item.label}</span>
+            <ArrowUpRight
+              aria-hidden
+              size={16}
+              className={
+                item.featured
+                  ? "ml-auto text-white/70 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 dark:text-black/60"
+                  : "ml-auto text-muted-foreground transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
+              }
+            />
+          </motion.a>
+        );
+      })}
     </div>
   );
 }

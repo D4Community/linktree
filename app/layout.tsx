@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { Josefin_Sans } from "next/font/google";
 import "./globals.css";
-
-const josfin = Josefin_Sans({ subsets: ["latin"] });
+import ThemeProvider from "./components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "D4 Community",
@@ -15,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${josfin.className} antialiased`}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }
